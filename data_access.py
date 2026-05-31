@@ -1,0 +1,66 @@
+"""
+Capa de acceso a datos unificada.
+Usa SQLite local o la API remota según config.py / stockvibe_config.json.
+"""
+import config
+
+if config.is_remote():
+    from api_client import (  # noqa: F401
+        init_db,
+        get_exchange_rate,
+        update_exchange_rate,
+        get_categories,
+        add_category,
+        update_category,
+        delete_category,
+        get_products,
+        add_product,
+        update_product,
+        delete_product,
+        quick_add_stock,
+        get_customers,
+        add_customer,
+        delete_customer,
+        register_sale,
+        get_sales_history,
+        get_sale_details,
+        get_pending_credits,
+        register_credit_payment,
+        get_debtor_accounts,
+        get_debtor_details,
+        get_daily_balance,
+        clear_sales_history,
+        get_dashboard_stats,
+        export_inventory_csv,
+        import_inventory_csv,
+    )
+else:
+    from database import (  # noqa: F401
+        init_db,
+        get_exchange_rate,
+        update_exchange_rate,
+        get_categories,
+        add_category,
+        update_category,
+        delete_category,
+        get_products,
+        add_product,
+        update_product,
+        delete_product,
+        quick_add_stock,
+        get_customers,
+        add_customer,
+        delete_customer,
+        register_sale,
+        get_sales_history,
+        get_sale_details,
+        get_pending_credits,
+        register_credit_payment,
+        get_debtor_accounts,
+        get_debtor_details,
+        get_daily_balance,
+        clear_sales_history,
+        get_dashboard_stats,
+        export_inventory_csv,
+        import_inventory_csv,
+    )

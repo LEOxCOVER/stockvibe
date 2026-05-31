@@ -1,0 +1,8 @@
+stockvibe_config.json
+inventory.db
+__pycache__/
+*.pyc
+.venv/
+build/
+dist/
+*.spec.bak

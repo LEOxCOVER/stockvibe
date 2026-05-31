@@ -1,0 +1,2 @@
+pywebview>=5.1
+kivy>=2.2.0

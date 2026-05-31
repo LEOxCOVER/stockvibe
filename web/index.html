@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockVibe v1.2 - Control de Inventario</title>
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- BARRA LATERAL DE NAVEGACIÓN -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
+                </div>
+                <span class="brand-name">StockVibe</span>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" id="nav-dashboard" onclick="switchTab('dashboard')">
+                    <svg class="nav-icon" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="9"></rect>
+                        <rect x="14" y="3" width="7" height="5"></rect>
+                        <rect x="14" y="12" width="7" height="9"></rect>
+                        <rect x="3" y="16" width="7" height="5"></rect>
+                    </svg>
+                    <span>Panel de Control</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-inventory" onclick="switchTab('inventory')">
+                    <svg class="nav-icon" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    </svg>
+                    <span>Inventario</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-categories" onclick="switchTab('categories')">
+                    <svg class="nav-icon" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    <span>Categorías</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-pos" onclick="switchTab('pos')">
+                    <svg class="nav-icon" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                    <span>Venta Expresa</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-history" onclick="switchTab('history')">
+                    <svg class="nav-icon" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="12 8 12 12 14 14"></polyline>
+                        <path d="M3.05 11a9 9 0 1 1 .45 4m-.45-4H3v3"></path>
+                    </svg>
+                    <span>Historial Ventas</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-credits" onclick="switchTab('credits')">
+                    <svg class="nav-icon" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    <span>Cuentas por Cobrar</span>
+                    <span class="badge-alert" id="sidebar-credits-badge" style="display: none; background: var(--gradient-primary); box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);">0</span>
+                </a>
+                <!-- FASE 3: Balance Diario -->
+                <a href="#" class="nav-item" id="nav-balance" onclick="switchTab('balance')">
+                    <svg class="nav-icon" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                    <span>Balance Diario</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-alerts" onclick="switchTab('alerts')">
+                    <svg class="nav-icon" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                    <span>Alertas de Stock</span>
+                    <span class="badge-alert" id="sidebar-alert-badge" style="display: none;">0</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-settings" onclick="switchTab('settings')">
+                    <svg class="nav-icon" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                    <span>Ajustes & Tasa</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="exchange-rate-badge" id="sidebar-exchange-rate">Tasa: 45.00 Bs/$</div>
+                <span class="user-role">Administrador</span>
+                <span class="business-tag">Mi Negocio v1.2</span>
+            </div>
+        </aside>
+
+        <!-- PANEL DE CONTENIDO PRINCIPAL -->
+        <main class="main-content">
+            <!-- CABECERA SUPERIOR -->
+            <header class="top-header">
+                <div class="header-info">
+                    <h1 id="page-title">Panel de Control</h1>
+                    <p id="page-subtitle" class="text-muted">Estadísticas actuales e información global de tu negocio.</p>
+                </div>
+                <div class="header-actions">
+                    <div id="connection-status" class="status-indicator">
+                        <span class="dot online"></span>
+                        <span>Motor Conectado</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- SECCIÓN: PANEL DE CONTROL (DASHBOARD) -->
+            <section id="section-dashboard" class="content-section active">
+                <div class="stats-grid stats-grid-5">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Inventario a Costo</span>
+                            <div class="stat-icon-bg primary">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                            </div>
+                        </div>
+                        <div class="stat-value" id="stat-inv-cost">0.00 Bs.</div>
+                        <div class="stat-desc" id="stat-inv-cost-usd">$0.00</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Venta Proyectada</span>
+                            <div class="stat-icon-bg success">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                            </div>
+                        </div>
+                        <div class="stat-value" id="stat-inv-value">0.00 Bs.</div>
+                        <div class="stat-desc" id="stat-inv-value-usd">$0.00</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Ganancia Proyectada</span>
+                            <div class="stat-icon-bg warning">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 6l-9.5 9.5-5-5L1 18"></path><polyline points="17 6 23 6 23 12"></polyline></svg>
+                            </div>
+                        </div>
+                        <div class="stat-value text-indigo" id="stat-inv-profit">0.00 Bs.</div>
+                        <div class="stat-desc" id="stat-inv-profit-usd">$0.00</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Cuentas por Cobrar</span>
+                            <div class="stat-icon-bg warning" style="background-color: rgba(99, 102, 241, 0.1); color: var(--primary);">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                            </div>
+                        </div>
+                        <div class="stat-value" style="color: #c084fc;" id="stat-inv-credits">0.00 Bs.</div>
+                        <div class="stat-desc" id="stat-inv-credits-usd">$0.00 de deuda activa</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-title">Alertas de Stock</span>
+                            <div class="stat-icon-bg danger" id="stat-alert-icon-bg">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                            </div>
+                        </div>
+                        <div class="stat-value" id="stat-low-stock">0</div>
+                        <div class="stat-desc" id="stat-low-stock-desc">Productos en stock mínimo.</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-details">
+                    <!-- Gráficos de Ventas Recientes -->
+                    <div class="detail-card main-chart-card">
+                        <div class="card-header">
+                            <h3>Rendimiento de Ventas (Últimos 7 Días)</h3>
+                            <p class="text-muted">Historial financiero de ingresos diarios y utilidad neta en dólares base.</p>
+                        </div>
+                        <div class="chart-container" id="dashboard-chart-container">
+                            <!-- El gráfico SVG interactivo se inyectará aquí -->
+                            <div class="no-data-chart">No hay ventas registradas en los últimos 7 días.</div>
+                        </div>
+                    </div>
+
+                    <!-- Distribución y Actividad Reciente -->
+                    <div class="detail-card side-info-card">
+                        <div class="card-header">
+                            <h3>Resumen Hoy</h3>
+                            <p class="text-muted">Consolidación en moneda dual.</p>
+                        </div>
+                        <div class="today-stats">
+                            <div class="today-item">
+                                <span class="label">Ingresos de Hoy</span>
+                                <div class="dual-value-container">
+                                    <span class="value success block-val" id="today-revenue">0.00 Bs.</span>
+                                    <span class="value-sub block-val" id="today-revenue-usd">$0.00</span>
+                                </div>
+                            </div>
+                            <div class="today-item">
+                                <span class="label">Utilidad de Hoy</span>
+                                <div class="dual-value-container">
+                                    <span class="value indigo block-val" id="today-profit">0.00 Bs.</span>
+                                    <span class="value-sub block-val" id="today-profit-usd">$0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-header border-top" style="margin-top: 20px; padding-top: 15px;">
+                            <h3>Distribución por Categorías</h3>
+                            <p class="text-muted">Proporción de productos cargados por rubro.</p>
+                        </div>
+                        <div class="category-list-compact" id="dashboard-category-list">
+                            <!-- Lista inyectada dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECCIÓN: INVENTARIO (PRODUCTOS) -->
+            <section id="section-inventory" class="content-section">
+                <div class="table-actions-bar">
+                    <!-- Filtros y Buscador -->
+                    <div class="filters-group">
+                        <div class="search-box">
+                            <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            <input type="text" id="inventory-search" placeholder="Buscar por nombre o SKU..." oninput="filterProducts()">
+                        </div>
+                        <select id="inventory-filter-category" onchange="filterProducts()">
+                            <option value="">Todas las Categorías</option>
+                            <!-- Inyectado dinámicamente -->
+                        </select>
+                        <select id="inventory-filter-stock" onchange="filterProducts()">
+                            <option value="all">Todo el Stock</option>
+                            <option value="in_stock">Con Stock (> Alerta)</option>
+                            <option value="low_stock">Stock Bajo (<= Alerta)</option>
+                            <option value="out_of_stock">Agotado (0 unidades)</option>
+                        </select>
+                    </div>
+
+                    <!-- Botón agregar producto -->
+                    <button type="button" id="btn-open-product" class="btn btn-primary">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        <span>Nuevo Producto</span>
+                    </button>
+                </div>
+
+                <!-- Tabla de Productos -->
+                <div class="table-container">
+                    <table class="modern-table" id="products-table">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>SKU / Código</th>
+                                <th>Categoría</th>
+                                <th class="text-right">P. Compra</th>
+                                <th class="text-right">P. Venta</th>
+                                <th class="text-right">Margen</th>
+                                <th class="text-center">Stock</th>
+                                <th class="text-center">Alerta Mín.</th>
+                                <th class="text-center">Estado</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-tbody">
+                            <!-- Inyectado dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- SECCIÓN: CATEGORÍAS -->
+            <section id="section-categories" class="content-section">
+                <div class="table-actions-bar">
+                    <div class="filters-group">
+                        <p class="text-muted">Organiza tus productos en grupos lógicos para un análisis detallado.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openCategoryModal()">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        <span>Nueva Categoría</span>
+                    </button>
+                </div>
+
+                <div class="categories-layout">
+                    <!-- Listado de Categorías -->
+                    <div class="table-container flex-grow-1">
+                        <table class="modern-table" id="categories-table">
+                            <thead>
+                                <tr>
+                                    <th>Categoría</th>
+                                    <th>Descripción</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="categories-tbody">
+                                <!-- Inyectado dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECCIÓN: PUNTO DE VENTA EXPRESO (POS) -->
+            <section id="section-pos" class="content-section">
+                <div class="pos-container">
+                    <!-- Buscador y catálogo de selección rápida -->
+                    <div class="pos-catalog">
+                        <div class="search-box mb-15">
+                            <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            <input type="text" id="pos-search" placeholder="Escribe el nombre o SKU para agregar al carrito..." oninput="filterPosCatalog()">
+                        </div>
+
+                        <!-- Catálogo rápido en tarjetas -->
+                        <div class="pos-grid" id="pos-grid">
+                            <!-- Inyectado dinámicamente -->
+                        </div>
+                    </div>
+
+                    <!-- Carrito de compras -->
+                    <div class="pos-cart">
+                        <div class="cart-header">
+                            <h3>Carrito de Ventas</h3>
+                            <button class="btn btn-sm btn-outline-danger" onclick="clearCart()">Vaciar</button>
+                        </div>
+
+                        <div class="cart-items" id="cart-items-container">
+                            <!-- Items inyectados -->
+                            <div class="empty-cart-message">
+                                <svg viewBox="0 0 24 24" width="40" height="40" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="9" cy="21" r="1"></circle>
+                                    <circle cx="20" cy="21" r="1"></circle>
+                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                </svg>
+                                <p>El carrito está vacío. Agrega productos desde el catálogo de la izquierda.</p>
+                            </div>
+                        </div>
+
+                        <div class="cart-footer">
+                            <!-- Condición de Pago y Deuda -->
+                            <div class="payment-method-container mb-15">
+                                <label class="block-label">Método de Pago:</label>
+                                <div class="payment-toggle-group">
+                                    <button type="button" class="btn-toggle active" id="btn-pay-cash" onclick="setPaymentMethod('contado')">Al Contado</button>
+                                    <button type="button" class="btn-toggle" id="btn-pay-credit" onclick="setPaymentMethod('credito')">A Crédito</button>
+                                </div>
+                            </div>
+                            
+                            <div id="pos-debtor-group" class="debtor-inputs-box mb-15" style="display: none;">
+                                <div class="form-group">
+                                    <label for="pos-debtor-name">Cliente / Deudor *</label>
+                                    <!-- FASE 3: Select para clientes recurrentes + opción de nuevo -->
+                                    <div class="customer-select-wrapper">
+                                        <select id="pos-debtor-select" onchange="onCustomerSelectChange()">
+                                            <option value="">— Seleccionar cliente registrado —</option>
+                                            <option value="__new__">+ Agregar nuevo cliente...</option>
+                                            <!-- Inyectado dinámicamente -->
+                                        </select>
+                                        <input type="text" id="pos-debtor-name" placeholder="Nombre del nuevo cliente..." style="display: none;">
+                                    </div>
+                                </div>
+                                <div class="form-group mt-10">
+                                    <label for="pos-initial-payment">Abono Inicial ($ USD - Opcional)</label>
+                                    <div class="currency-input-group">
+                                        <input type="number" id="pos-initial-payment" step="0.01" min="0" placeholder="0.00" oninput="calculateInitialPaymentBs()">
+                                        <button type="button" class="currency-toggle-btn" id="pos-initial-currency-btn" onclick="togglePosInitialCurrency()">$ USD</button>
+                                    </div>
+                                </div>
+                                <div class="mt-5" style="font-size: 12.5px; font-weight: 600; color: var(--success); text-align: right;" id="pos-initial-payment-bs">
+                                    Equivale a: 0.00 Bs.
+                                </div>
+                            </div>
+
+                            <div class="cart-totals">
+                                <div class="total-row">
+                                    <span>Subtotal:</span>
+                                    <div class="totals-dual">
+                                        <span id="cart-subtotal" class="main-tot">0.00 Bs.</span>
+                                        <span id="cart-subtotal-usd" class="sub-tot">$0.00</span>
+                                    </div>
+                                </div>
+                                <div class="total-row total-grand">
+                                    <span>Total Cobrar:</span>
+                                    <div class="totals-dual text-right">
+                                        <span id="cart-total" class="main-tot block-val">0.00 Bs.</span>
+                                        <span id="cart-total-usd" class="sub-tot block-val">$0.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn btn-success btn-lg w-100" id="btn-checkout" onclick="checkoutSale()" disabled>
+                                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>Confirmar Cobro (Venta)</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECCIÓN: HISTORIAL DE VENTAS -->
+            <section id="section-history" class="content-section">
+                <div class="table-actions-bar">
+                    <p class="text-muted">Consulta y audita todas las transacciones realizadas en el negocio.</p>
+                </div>
+
+                <div class="table-container">
+                    <table class="modern-table" id="sales-table">
+                        <thead>
+                            <tr>
+                                <th>ID Venta</th>
+                                <th>Fecha y Hora</th>
+                                <th>Método</th>
+                                <th>Cliente / Deudor</th>
+                                <th class="text-right">Total Recaudado</th>
+                                <th class="text-right">Costo Mercancía</th>
+                                <th class="text-right">Ganancia Neta</th>
+                                <th class="text-center">Detalles</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sales-tbody">
+                            <!-- Inyectado dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- SECCIÓN: CUENTAS POR COBRAR - FASE 3: VISTA AGRUPADA POR DEUDOR -->
+            <section id="section-credits" class="content-section">
+                <div class="table-actions-bar">
+                    <p class="text-muted">Cuentas corrientes de deudores con saldos pendientes. Haz clic en un deudor para ver su historial detallado.</p>
+                </div>
+
+                <div class="table-container">
+                    <table class="modern-table" id="credits-table">
+                        <thead>
+                            <tr>
+                                <th>Deudor</th>
+                                <th class="text-center">Facturas</th>
+                                <th class="text-right">Total Crédito</th>
+                                <th class="text-right">Total Abonado</th>
+                                <th class="text-right">Saldo Pendiente</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="credits-tbody">
+                            <!-- Inyectado dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- SECCIÓN: BALANCE DIARIO -->
+            <section id="section-balance" class="content-section">
+                <div class="table-actions-bar">
+                    <div class="filters-group">
+                        <label style="font-weight: 600; color: var(--text-muted); margin-right: 8px;">Fecha:</label>
+                        <input type="date" id="balance-date-picker" onchange="loadDailyBalance()" style="max-width: 200px;">
+                    </div>
+                </div>
+
+                <div class="balance-layout">
+                    <!-- Caja (Dinero Recibido) -->
+                    <div class="balance-card">
+                        <div class="balance-card-header success-header">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M12 10v4m-2-2h4"/></svg>
+                            <h3>Caja del Día (Dinero Recibido)</h3>
+                        </div>
+                        <div class="balance-items">
+                            <div class="balance-item">
+                                <span class="balance-label">Ventas al Contado</span>
+                                <div class="balance-value-dual">
+                                    <span class="balance-main" id="bal-cash-contado">0.00 Bs.</span>
+                                    <span class="balance-sub" id="bal-cash-contado-usd">$0.00</span>
+                                </div>
+                            </div>
+                            <div class="balance-item">
+                                <span class="balance-label">Abonos Recibidos</span>
+                                <div class="balance-value-dual">
+                                    <span class="balance-main" id="bal-cash-abonos">0.00 Bs.</span>
+                                    <span class="balance-sub" id="bal-cash-abonos-usd">$0.00</span>
+                                </div>
+                            </div>
+                            <div class="balance-item balance-total">
+                                <span class="balance-label">TOTAL EN CAJA</span>
+                                <div class="balance-value-dual">
+                                    <span class="balance-main text-success" style="font-size: 22px;" id="bal-total-cash">0.00 Bs.</span>
+                                    <span class="balance-sub" id="bal-total-cash-usd">$0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Facturación -->
+                    <div class="balance-card">
+                        <div class="balance-card-header primary-header">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                            <h3>Facturación del Día</h3>
+                        </div>
+                        <div class="balance-items">
+                            <div class="balance-item">
+                                <span class="balance-label">Ventas a Crédito Emitidas</span>
+                                <div class="balance-value-dual">
+                                    <span class="balance-main" style="color: var(--warning);" id="bal-credit-issued">0.00 Bs.</span>
+                                    <span class="balance-sub" id="bal-credit-issued-usd">$0.00</span>
+                                </div>
+                            </div>
+                            <div class="balance-item balance-total">
+                                <span class="balance-label">TOTAL FACTURADO</span>
+                                <div class="balance-value-dual">
+                                    <span class="balance-main text-indigo" style="font-size: 22px;" id="bal-total-invoiced">0.00 Bs.</span>
+                                    <span class="balance-sub" id="bal-total-invoiced-usd">$0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rentabilidad -->
+                    <div class="balance-card">
+                        <div class="balance-card-header warning-header">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 6l-9.5 9.5-5-5L1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                            <h3>Rentabilidad del Día</h3>
+                        </div>
+                        <div class="balance-items">
+                            <div class="balance-item">
+                                <span class="balance-label">Costo de Mercancía Vendida</span>
+                                <div class="balance-value-dual">
+                                    <span class="balance-main text-muted" id="bal-total-cost">0.00 Bs.</span>
+                                    <span class="balance-sub" id="bal-total-cost-usd">$0.00</span>
+                                </div>
+                            </div>
+                            <div class="balance-item balance-total">
+                                <span class="balance-label">UTILIDAD NETA</span>
+                                <div class="balance-value-dual">
+                                    <span class="balance-main text-success" style="font-size: 22px;" id="bal-net-profit">0.00 Bs.</span>
+                                    <span class="balance-sub" id="bal-net-profit-usd">$0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="balance-summary-bar" id="balance-summary-bar">
+                    <div class="summary-item">
+                        <span class="summary-label">Operaciones Totales</span>
+                        <span class="summary-value" id="bal-total-ops">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Ventas Contado</span>
+                        <span class="summary-value" id="bal-cash-count">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Ventas Crédito</span>
+                        <span class="summary-value" id="bal-credit-count">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Abonos Registrados</span>
+                        <span class="summary-value" id="bal-abonos-count">0</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECCIÓN: ALERTAS DE STOCK BAJO -->
+            <section id="section-alerts" class="content-section">
+                <div class="table-actions-bar">
+                    <p class="text-muted">Lista detallada de productos que requieren reposición urgente de inventario.</p>
+                </div>
+
+                <div class="table-container">
+                    <table class="modern-table" id="alerts-table">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>SKU / Código</th>
+                                <th>Categoría</th>
+                                <th class="text-center">Stock Actual</th>
+                                <th class="text-center">Stock Mínimo</th>
+                                <th class="text-center">Unidades Faltantes</th>
+                                <th class="text-center">Estado Crítico</th>
+                            </tr>
+                        </thead>
+                        <tbody id="alerts-tbody">
+                            <!-- Inyectado dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- SECCIÓN: AJUSTES Y TASA DE CAMBIO -->
+            <section id="section-settings" class="content-section">
+                <div class="settings-layout-box">
+                    <!-- Sincronización en la nube -->
+                    <div class="settings-card glassmorphic col-span-full">
+                        <div class="card-header w-100" style="text-align: left; align-items: flex-start;">
+                            <div class="stat-icon-bg primary mb-15">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+                            </div>
+                            <h3>Sincronización en la Nube</h3>
+                            <p class="text-muted">Conecta escritorio y móvil a la misma base de datos central (Render + Neon, plan gratuito). Tras guardar, reinicia la aplicación.</p>
+                        </div>
+                        <div class="card-body mt-20 w-100">
+                            <form id="cloud-config-form" onsubmit="saveCloudConfig(event)" class="form-grid-2">
+                                <div class="form-group">
+                                    <label for="cloud-mode">Modo de datos</label>
+                                    <select id="cloud-mode" required>
+                                        <option value="local">Local (SQLite en este equipo)</option>
+                                        <option value="remote">Remoto (API en la nube)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="cloud-api-url">URL del servidor API</label>
+                                    <input type="url" id="cloud-api-url" placeholder="https://stockvibe-api.onrender.com">
+                                </div>
+                                <div class="form-group col-span-full">
+                                    <label for="cloud-api-key">Clave API (X-API-Key)</label>
+                                    <input type="password" id="cloud-api-key" placeholder="Tu clave secreta">
+                                    <small class="text-muted" id="cloud-api-key-hint"></small>
+                                </div>
+                                <div class="form-actions col-span-full" style="display:flex; gap:12px; flex-wrap:wrap;">
+                                    <button type="submit" class="btn btn-primary">Guardar configuración</button>
+                                    <button type="button" class="btn btn-outline-primary" onclick="testCloudConnection()">Probar conexión</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Configuración de Tasa de Cambio -->
+                    <div class="settings-card glassmorphic col-span-full">
+                        <div class="card-header w-100" style="text-align: left; align-items: flex-start;">
+                            <div class="stat-icon-bg primary mb-15">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                            </div>
+                            <h3>Ajuste de Tasa de Cambio (Bolívares / Dólar)</h3>
+                            <p class="text-muted">Establece la tasa oficial de conversión. Todos los precios expresados en Bolívares (Bs.) se actualizarán dinámicamente en base a los dólares registrados en el inventario.</p>
+                        </div>
+                        <div class="card-body mt-20 w-100">
+                            <form id="exchange-rate-form" onsubmit="saveExchangeRate(event)" class="form-horizontal">
+                                <div class="form-group flex-grow-1">
+                                    <label for="form-settings-exchange-rate">Tasa de Cambio Oficial (Bs. por $1 USD) *</label>
+                                    <input type="number" id="form-settings-exchange-rate" step="0.01" min="0.01" required placeholder="0.00">
+                                </div>
+                                <button type="submit" class="btn btn-primary" style="margin-top: 22px;">Actualizar Tasa</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Exportación de base de datos -->
+                    <div class="settings-card glassmorphic">
+                        <div class="card-header">
+                            <div class="stat-icon-bg primary mb-15">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                            </div>
+                            <h3>Exportar Base de Datos</h3>
+                            <p class="text-muted">Descarga todo tu catálogo de productos e inventario en un archivo CSV compatible con Excel.</p>
+                        </div>
+                        <div class="card-body mt-20 w-100">
+                            <button class="btn btn-outline-primary btn-lg w-100" onclick="exportCSV()">
+                                Exportar Catálogo a CSV
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Importación de base de datos -->
+                    <div class="settings-card glassmorphic">
+                        <div class="card-header">
+                            <div class="stat-icon-bg success mb-15">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                            </div>
+                            <h3>Importar desde Excel (CSV)</h3>
+                            <p class="text-muted">Carga productos de forma masiva desde un archivo CSV. Si el SKU ya existe, actualizará los precios y sumará el stock automáticamente.</p>
+                        </div>
+                        <div class="card-body mt-20 w-100">
+                            <button class="btn btn-outline-success btn-lg w-100" onclick="importCSV()">
+                                Importar Catálogo desde CSV
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- FASE 3: Zona de Peligro - Limpieza de Ventas -->
+                    <div class="settings-card glassmorphic danger-zone col-span-full">
+                        <div class="card-header w-100" style="text-align: left; align-items: flex-start;">
+                            <div class="stat-icon-bg danger mb-15">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            </div>
+                            <h3>Zona de Peligro — Restablecer Historial</h3>
+                            <p class="text-muted">Eliminar todas las ventas, créditos, abonos e historial de transacciones. El inventario de productos y categorías se conservará intacto. Esta acción NO se puede deshacer.</p>
+                        </div>
+                        <div class="card-body mt-20 w-100">
+                            <button class="btn btn-danger btn-lg w-100" onclick="confirmClearSalesHistory()">
+                                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                                <span>Restablecer Historial de Ventas</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL: AGREGAR / EDITAR PRODUCTO (FASE 3: Dual Currency + Margen Esperado) -->
+    <div id="product-modal" class="modal-overlay">
+        <div class="modal-box glassmorphic" style="width: 660px;">
+            <div class="modal-header">
+                <h3 id="product-modal-title">Agregar Nuevo Producto</h3>
+                <button class="modal-close" onclick="closeProductModal()">&times;</button>
+            </div>
+            <form id="product-form" onsubmit="saveProduct(event)">
+                <input type="hidden" id="form-product-id">
+                <div class="form-grid">
+                    <div class="form-group col-span-2">
+                        <label for="form-product-name">Nombre del Producto *</label>
+                        <input type="text" id="form-product-name" required placeholder="Ej. Mouse Gamer Razer">
+                    </div>
+                    <div class="form-group">
+                        <label for="form-product-sku">Código de Barras / SKU</label>
+                        <input type="text" id="form-product-sku" placeholder="Ej. SKU-102938">
+                    </div>
+                    <div class="form-group">
+                        <label for="form-product-category">Categoría *</label>
+                        <select id="form-product-category" required>
+                            <option value="">Seleccionar Categoría</option>
+                            <!-- Inyectado dinámicamente -->
+                        </select>
+                    </div>
+                    <div class="form-group col-span-2">
+                        <label for="form-product-desc">Descripción</label>
+                        <textarea id="form-product-desc" rows="2" placeholder="Detalles de color, tamaño, etc."></textarea>
+                    </div>
+
+                    <!-- FASE 3: Costo de Compra con selector de moneda -->
+                    <div class="form-group">
+                        <label>Costo de Compra *</label>
+                        <div class="currency-input-group">
+                            <input type="number" id="form-product-p-price" step="0.01" min="0" required placeholder="0.00" oninput="onPurchasePriceInput()">
+                            <button type="button" class="currency-toggle-btn" id="btn-purchase-currency" onclick="togglePurchaseCurrency()">$ USD</button>
+                        </div>
+                    </div>
+
+                    <!-- FASE 3: Precio de Venta con selector de moneda -->
+                    <div class="form-group">
+                        <label>Precio de Venta *</label>
+                        <div class="currency-input-group">
+                            <input type="number" id="form-product-s-price" step="0.01" min="0" required placeholder="0.00" oninput="onSalePriceInput()">
+                            <button type="button" class="currency-toggle-btn" id="btn-sale-currency" onclick="toggleSaleCurrency()">$ USD</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Precio en Bolívares</label>
+                        <div class="read-only-indicator" id="form-product-bs-preview">0.00 Bs.</div>
+                    </div>
+
+                    <!-- FASE 3: Margen esperado para auto-cálculo de precio de venta -->
+                    <div class="form-group">
+                        <label for="form-product-margin-input">Margen Esperado (%)</label>
+                        <div class="currency-input-group">
+                            <input type="number" id="form-product-margin-input" step="0.1" min="0" placeholder="Ej. 50" oninput="calculateSalePriceFromMargin()">
+                            <span class="currency-toggle-btn static">%</span>
+                        </div>
+                    </div>
+
+                    <!-- Margen calculado actual -->
+                    <div class="form-group">
+                        <label>Margen Actual (sobre costo)</label>
+                        <div class="read-only-indicator" id="form-product-margin">0.00%</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="form-product-stock">Stock Inicial *</label>
+                        <input type="number" id="form-product-stock" min="0" required placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="form-product-min-stock">Alerta de Stock Mínimo *</label>
+                        <input type="number" id="form-product-min-stock" min="0" required placeholder="5">
+                    </div>
+                </div>
+                <div class="modal-footer mt-20">
+                    <button type="button" class="btn btn-outline-danger" onclick="closeProductModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Guardar Producto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: AGREGAR / EDITAR CATEGORÍA -->
+    <div id="category-modal" class="modal-overlay">
+        <div class="modal-box modal-sm glassmorphic">
+            <div class="modal-header">
+                <h3 id="category-modal-title">Nueva Categoría</h3>
+                <button class="modal-close" onclick="closeCategoryModal()">&times;</button>
+            </div>
+            <form id="category-form" onsubmit="saveCategory(event)">
+                <input type="hidden" id="form-category-id">
+                <div class="form-group">
+                    <label for="form-category-name">Nombre de la Categoría *</label>
+                    <input type="text" id="form-category-name" required placeholder="Ej. Ferretería">
+                </div>
+                <div class="form-group mt-15">
+                    <label for="form-category-desc">Descripción</label>
+                    <textarea id="form-category-desc" rows="3" placeholder="Artículos del rubro de..."></textarea>
+                </div>
+                <div class="modal-footer mt-20">
+                    <button type="button" class="btn btn-outline-danger" onclick="closeCategoryModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Guardar Categoría</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: DETALLES DE VENTA -->
+    <div id="sale-detail-modal" class="modal-overlay">
+        <div class="modal-box glassmorphic">
+            <div class="modal-header">
+                <h3 id="sale-detail-title">Comprobante de Venta #--</h3>
+                <button class="modal-close" onclick="closeSaleDetailModal()">&times;</button>
+            </div>
+            <div class="sale-detail-metadata">
+                <div><strong>Fecha:</strong> <span id="sale-det-date">--</span></div>
+                <div><strong>Total:</strong> <span id="sale-det-total" class="text-success">$0.00</span></div>
+                <div><strong>Utilidad:</strong> <span id="sale-det-profit" class="text-indigo">$0.00</span></div>
+                <div><strong>Estado:</strong> <span id="sale-det-status" class="badge">--</span></div>
+                <div id="sale-det-debtor-group" style="display: none;"><strong>Cliente:</strong> <span id="sale-det-debtor">--</span></div>
+                <div id="sale-det-paid-group" style="display: none;"><strong>Abonado:</strong> <span id="sale-det-paid">--</span></div>
+            </div>
+            <div class="table-container mt-15 max-h-300">
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>SKU</th>
+                            <th class="text-center">Cantidad</th>
+                            <th class="text-right">Precio Venta</th>
+                            <th class="text-right">Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sale-detail-tbody">
+                        <!-- Inyectado dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer mt-20">
+                <button class="btn btn-primary" onclick="closeSaleDetailModal()">Cerrar Detalles</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: REGISTRAR ABONO / LIQUIDACIÓN DE DEUDA -->
+    <div id="credit-payment-modal" class="modal-overlay">
+        <div class="modal-box modal-sm glassmorphic">
+            <div class="modal-header">
+                <h3 id="credit-payment-title">Registrar Abono</h3>
+                <button class="modal-close" onclick="closeCreditPaymentModal()">&times;</button>
+            </div>
+            <form id="credit-payment-form" onsubmit="saveCreditPayment(event)">
+                <input type="hidden" id="form-credit-sale-id">
+                <div class="sale-detail-metadata col-span-2 mb-15" style="grid-template-columns: 1fr; gap: 8px;">
+                    <div><strong>Deudor:</strong> <span id="form-credit-customer">--</span></div>
+                    <div><strong>Deuda Pendiente:</strong> <span id="form-credit-remaining" class="text-danger" style="font-weight: 700;">0.00 Bs. ($0.00)</span></div>
+                </div>
+                <div class="form-group">
+                    <label for="form-credit-payment-usd">Monto del Abono ($ USD) *</label>
+                    <input type="number" id="form-credit-payment-usd" step="0.01" min="0.01" required placeholder="0.00" oninput="calculateCreditPaymentBs()">
+                </div>
+                <div class="form-group mt-15">
+                    <label>Equivalente en Bolívares (Bs.)</label>
+                    <div class="read-only-indicator" id="form-credit-payment-bs" style="color: var(--success); font-weight: 700;">0.00 Bs.</div>
+                </div>
+                <div class="modal-footer mt-20">
+                    <button type="button" class="btn btn-outline-danger" onclick="closeCreditPaymentModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Confirmar Abono</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: STOCK RÁPIDO -->
+    <div id="quick-stock-modal" class="modal-overlay">
+        <div class="modal-box modal-sm glassmorphic">
+            <div class="modal-header">
+                <h3 id="quick-stock-title">Agregar Stock</h3>
+                <button class="modal-close" onclick="closeQuickStockModal()">&times;</button>
+            </div>
+            <form id="quick-stock-form" onsubmit="saveQuickStock(event)">
+                <input type="hidden" id="form-quick-stock-id">
+                <div class="sale-detail-metadata mb-15" style="grid-template-columns: 1fr; gap: 8px;">
+                    <div><strong>Producto:</strong> <span id="form-quick-stock-name">--</span></div>
+                    <div><strong>Stock Actual:</strong> <span id="form-quick-stock-current" style="font-weight: 700; color: var(--primary);">0</span> unidades</div>
+                </div>
+                <div class="form-group">
+                    <label for="form-quick-stock-qty">Unidades a Agregar *</label>
+                    <input type="number" id="form-quick-stock-qty" min="1" required placeholder="Ej. 10">
+                </div>
+                <div class="modal-footer mt-20">
+                    <button type="button" class="btn btn-outline-danger" onclick="closeQuickStockModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Agregar al Stock</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: DESGLOSE DE CUENTA DE DEUDOR -->
+    <div id="debtor-detail-modal" class="modal-overlay">
+        <div class="modal-box glassmorphic" style="width: 700px; max-height: 85vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3 id="debtor-detail-title">Cuenta de: --</h3>
+                <button class="modal-close" onclick="closeDebtorDetailModal()">&times;</button>
+            </div>
+            <div class="sale-detail-metadata mb-15" style="grid-template-columns: repeat(3, 1fr);">
+                <div><strong>Total Crédito:</strong> <span id="debtor-det-total" class="text-muted" style="font-weight: 600;">$0.00</span></div>
+                <div><strong>Total Abonado:</strong> <span id="debtor-det-paid" class="text-success" style="font-weight: 600;">$0.00</span></div>
+                <div><strong>Saldo Pendiente:</strong> <span id="debtor-det-remaining" class="text-danger" style="font-weight: 700;">$0.00</span></div>
+            </div>
+            <div id="debtor-invoices-container">
+                <!-- Inyectado dinámicamente -->
+            </div>
+            <div class="modal-footer mt-20">
+                <button class="btn btn-primary" onclick="closeDebtorDetailModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENEDOR DE NOTIFICACIONES TOAST -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
