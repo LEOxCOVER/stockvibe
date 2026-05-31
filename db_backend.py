@@ -57,7 +57,7 @@ class _CursorWrapper:
     def execute(self, sql, params=None):
         params = params or ()
         adapted = _adapt_sql(sql)
-        if self._is_postgres and _is_insert(adapted) and "RETURNING" not in adapted.upper():
+        if self._is_postgres and _should_return_id(adapted):
             adapted = adapted.rstrip().rstrip(";") + " RETURNING id"
             self._cursor.execute(adapted, params)
             row = self._cursor.fetchone()
@@ -115,6 +115,18 @@ class _ConnectionWrapper:
 
 def _is_insert(sql):
     return sql.lstrip().upper().startswith("INSERT")
+
+
+def _should_return_id(sql):
+    """Solo tablas con columna serial id; settings usa key como PK."""
+    if not _is_insert(sql):
+        return False
+    upper = sql.upper()
+    if "RETURNING" in upper:
+        return False
+    if "INTO SETTINGS" in upper:
+        return False
+    return True
 
 
 def _adapt_sql(sql):
