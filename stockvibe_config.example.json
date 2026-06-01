@@ -1,5 +1,5 @@
 {
-  "mode": "remote",
-  "api_url": "https://TU-SERVICIO.onrender.com",
+  "mode": "sync",
+  "api_url": "https://stockvibe-api.onrender.com",
   "api_key": "TU_CLAVE_SECRETA"
 }

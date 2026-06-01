@@ -1,5 +1,5 @@
 """
-Configuración de StockVibe: modo local (SQLite) o remoto (API en la nube).
+Configuración de StockVibe: local, sync (offline+online) o remoto puro.
 """
 import json
 import os
@@ -37,17 +37,29 @@ def save_config(data):
 
 
 def get_mode():
-    """'local' o 'remote'."""
+    """'local', 'sync' o 'remote'."""
     env = os.environ.get("STOCKVIBE_MODE", "").strip().lower()
-    if env in ("local", "remote"):
+    if env in ("local", "remote", "sync"):
         return env
     cfg = load_config()
-    mode = str(cfg.get("mode", "local")).strip().lower()
-    return mode if mode in ("local", "remote") else "local"
+    mode = str(cfg.get("mode", "")).strip().lower()
+    if mode in ("local", "remote", "sync"):
+        return mode
+    if get_api_url() and get_api_key():
+        return "sync"
+    return "local"
 
 
 def is_remote():
     return get_mode() == "remote"
+
+
+def is_sync():
+    return get_mode() == "sync"
+
+
+def is_local():
+    return get_mode() == "local"
 
 
 def get_api_url():

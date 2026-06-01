@@ -197,6 +197,7 @@ def init_db():
                        
         conn.commit()
 
+    init_sync_tables(conn)
     conn.close()
 
 # ----------------- TASA DE CAMBIO -----------------
@@ -1007,5 +1008,216 @@ def import_inventory_csv(filepath):
         return {"success": True, "message": f"Importación completada. {imported_count} productos procesados con éxito. {skipped_count} filas omitidas."}
     except Exception as e:
         return {"success": False, "error": str(e)}
+
+# ----------------- SINCRONIZACIÓN OFFLINE -----------------
+
+def init_sync_tables(conn=None):
+    """Tablas para cola de sincronización (solo clientes SQLite)."""
+    if db_backend.IS_POSTGRES:
+        return
+    close = False
+    if conn is None:
+        conn = get_db_connection()
+        close = True
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS sync_queue (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            operation TEXT NOT NULL,
+            payload TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            retries INTEGER NOT NULL DEFAULT 0
+        )
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS sync_meta (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL
+        )
+    """)
+    conn.commit()
+    if close:
+        conn.close()
+
+
+def enqueue_sync_operation(operation, payload_dict):
+    import json
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    cursor.execute(
+        "INSERT INTO sync_queue (operation, payload, created_at) VALUES (?, ?, ?)",
+        (operation, json.dumps(payload_dict, ensure_ascii=False), timestamp),
+    )
+    op_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    return op_id
+
+
+def get_pending_sync_operations():
+    import json
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, operation, payload, retries FROM sync_queue ORDER BY id ASC")
+    rows = []
+    for row in cursor.fetchall():
+        item = dict(row)
+        item["payload"] = json.loads(item["payload"])
+        rows.append(item)
+    conn.close()
+    return rows
+
+
+def remove_sync_operation(op_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM sync_queue WHERE id = ?", (op_id,))
+    conn.commit()
+    conn.close()
+
+
+def increment_sync_retry(op_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE sync_queue SET retries = retries + 1 WHERE id = ?", (op_id,))
+    conn.commit()
+    conn.close()
+
+
+def count_pending_sync_operations():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM sync_queue")
+    count = cursor.fetchone()[0]
+    conn.close()
+    return count
+
+
+def set_sync_meta(key, value):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("INSERT OR REPLACE INTO sync_meta (key, value) VALUES (?, ?)", (key, str(value)))
+    conn.commit()
+    conn.close()
+
+
+def get_sync_meta(key, default=None):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT value FROM sync_meta WHERE key = ?", (key,))
+    row = cursor.fetchone()
+    conn.close()
+    return row["value"] if row else default
+
+
+def adopt_product_id(local_id, server_id):
+    if local_id == server_id:
+        return
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("PRAGMA foreign_keys = OFF")
+    cursor.execute("DELETE FROM products WHERE id = ? AND id != ?", (server_id, local_id))
+    cursor.execute("UPDATE products SET id = ? WHERE id = ?", (server_id, local_id))
+    cursor.execute("UPDATE sale_items SET product_id = ? WHERE product_id = ?", (server_id, local_id))
+    cursor.execute("PRAGMA foreign_keys = ON")
+    conn.commit()
+    conn.close()
+
+
+def adopt_category_id(local_id, server_id):
+    if local_id == server_id:
+        return
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("PRAGMA foreign_keys = OFF")
+    cursor.execute("DELETE FROM categories WHERE id = ? AND id != ?", (server_id, local_id))
+    cursor.execute("UPDATE categories SET id = ? WHERE id = ?", (server_id, local_id))
+    cursor.execute("UPDATE products SET category_id = ? WHERE category_id = ?", (server_id, local_id))
+    cursor.execute("PRAGMA foreign_keys = ON")
+    conn.commit()
+    conn.close()
+
+
+def replace_categories_from_server(categories):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    for cat in categories:
+        cursor.execute(
+            "INSERT OR REPLACE INTO categories (id, name, description) VALUES (?, ?, ?)",
+            (cat["id"], cat["name"], cat.get("description") or ""),
+        )
+    conn.commit()
+    conn.close()
+
+
+def replace_products_from_server(products):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    for prod in products:
+        cursor.execute("""
+            INSERT OR REPLACE INTO products
+            (id, name, sku, category_id, description, purchase_price, sale_price, stock, min_stock)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            prod["id"], prod["name"], prod.get("sku"), prod.get("category_id"),
+            prod.get("description") or "", prod["purchase_price"], prod["sale_price"],
+            prod["stock"], prod["min_stock"],
+        ))
+    conn.commit()
+    conn.close()
+
+
+def replace_customers_from_server(customers):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    for cust in customers:
+        cursor.execute(
+            "INSERT OR REPLACE INTO customers (id, name, phone) VALUES (?, ?, ?)",
+            (cust["id"], cust["name"], cust.get("phone") or ""),
+        )
+    conn.commit()
+    conn.close()
+
+
+def replace_sales_from_server(sales_with_details):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM credit_payments")
+    cursor.execute("DELETE FROM sale_items")
+    cursor.execute("DELETE FROM sales")
+    for sale in sales_with_details:
+        cursor.execute("""
+            INSERT INTO sales
+            (id, timestamp, total_amount, total_cost, total_profit, payment_status, customer_name, amount_paid)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            sale["id"], sale["timestamp"], sale["total_amount"], sale["total_cost"],
+            sale["total_profit"], sale["payment_status"], sale.get("customer_name"),
+            sale.get("amount_paid", 0.0),
+        ))
+        for item in sale.get("items", []):
+            cursor.execute("""
+                INSERT INTO sale_items (sale_id, product_id, quantity, purchase_price, sale_price)
+                VALUES (?, ?, ?, ?, ?)
+            """, (
+                sale["id"], item.get("product_id"), item["quantity"],
+                item["purchase_price"], item["sale_price"],
+            ))
+        for payment in sale.get("credit_payments", []):
+            cursor.execute("""
+                INSERT INTO credit_payments (sale_id, timestamp, amount)
+                VALUES (?, ?, ?)
+            """, (payment["sale_id"], payment["timestamp"], payment["amount"]))
+    conn.commit()
+    conn.close()
+
+
+def set_exchange_rate_local(rate):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('exchange_rate', ?)", (str(rate),))
+    conn.commit()
+    conn.close()
 
 # init_db() se invoca explícitamente desde main.py, main_android.py o el servidor API.

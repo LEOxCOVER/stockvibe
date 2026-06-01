@@ -25,6 +25,11 @@
                 <span class="brand-name">StockVibe</span>
             </div>
 
+            <div id="sync-status-bar" class="sync-status-bar" style="display: none;">
+                <span id="sync-status-dot" class="sync-dot offline"></span>
+                <span id="sync-status-text">Sin conexión</span>
+            </div>
+
             <nav class="nav-menu">
                 <a href="#" class="nav-item active" id="nav-dashboard" onclick="switchTab('dashboard')">
                     <svg class="nav-icon" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -622,9 +627,11 @@
                                 <div class="form-group">
                                     <label for="cloud-mode">Modo de datos</label>
                                     <select id="cloud-mode" required>
-                                        <option value="local">Local (SQLite en este equipo)</option>
-                                        <option value="remote">Remoto (API en la nube)</option>
+                                        <option value="local">Local (solo este equipo)</option>
+                                        <option value="sync">Sync automático (recomendado)</option>
+                                        <option value="remote">Remoto (solo nube, requiere internet)</option>
                                     </select>
+                                    <small class="text-muted">Sync guarda todo localmente y sincroniza con la nube cuando hay internet.</small>
                                 </div>
                                 <div class="form-group">
                                     <label for="cloud-api-url">URL del servidor API</label>
@@ -638,6 +645,7 @@
                                 <div class="form-actions col-span-full" style="display:flex; gap:12px; flex-wrap:wrap;">
                                     <button type="submit" class="btn btn-primary">Guardar configuración</button>
                                     <button type="button" class="btn btn-outline-primary" onclick="testCloudConnection()">Probar conexión</button>
+                                    <button type="button" class="btn btn-outline-success" onclick="forceSyncNow()">Sincronizar ahora</button>
                                 </div>
                             </form>
                         </div>

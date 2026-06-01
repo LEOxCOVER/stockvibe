@@ -264,8 +264,8 @@ class Api:
     def save_cloud_config(self, data):
         try:
             mode = str(data.get("mode", "local")).strip().lower()
-            if mode not in ("local", "remote"):
-                return {"success": False, "error": "Modo inválido. Use 'local' o 'remote'."}
+            if mode not in ("local", "remote", "sync"):
+                return {"success": False, "error": "Modo inválido. Use 'local', 'sync' o 'remote'."}
             cfg = config.load_config()
             cfg["mode"] = mode
             if data.get("api_url"):
@@ -273,11 +273,35 @@ class Api:
             if data.get("api_key"):
                 cfg["api_key"] = str(data["api_key"]).strip()
             path = config.save_config(cfg)
-            return {
-                "success": True,
-                "message": f"Configuración guardada. Reinicia la aplicación para aplicar el modo '{mode}'.",
-                "path": path,
-            }
+            msg = f"Configuración guardada."
+            if mode == "sync":
+                msg += " Reinicia la app para activar sincronización automática."
+            elif mode == "remote":
+                msg += " Reinicia la app para usar solo la nube."
+            else:
+                msg += " Reinicia la app para volver al modo local."
+            return {"success": True, "message": msg, "path": path}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def get_sync_status(self):
+        try:
+            if not config.is_sync():
+                return {"success": True, "data": {"enabled": False, "mode": config.get_mode()}}
+            import sync_engine
+            return {"success": True, "data": {"mode": "sync", **sync_engine.get_status()}}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def force_sync_now(self):
+        try:
+            if not config.is_sync():
+                return {"success": False, "error": "La sincronización solo está disponible en modo 'sync'."}
+            import sync_engine
+            result = sync_engine.sync_all(force_pull=True)
+            if result.get("success"):
+                return {"success": True, "message": "Sincronización completada.", "data": sync_engine.get_status()}
+            return {"success": False, "error": result.get("error", "No se pudo sincronizar.")}
         except Exception as e:
             return {"success": False, "error": str(e)}
 
@@ -308,7 +332,6 @@ class Api:
             return {"success": False, "error": str(e)}
 
 def main():
-    # Inicializar base de datos (local) o verificar servidor (remoto)
     try:
         database.init_db()
     except Exception as e:
@@ -316,6 +339,10 @@ def main():
             print(f"Advertencia: no se pudo conectar al servidor remoto: {e}")
         else:
             raise
+
+    if config.is_sync():
+        import sync_engine
+        sync_engine.start_background_sync(interval=45)
     
     # Crear API
     api = Api()

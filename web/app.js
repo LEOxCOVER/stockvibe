@@ -53,6 +53,8 @@ async function setupApiConnection() {
     
     // Carga inicial de datos
     loadAllData();
+    updateSyncStatusUI();
+    setInterval(updateSyncStatusUI, 15000);
 }
 
 async function loadAllData() {
@@ -1580,6 +1582,50 @@ function renderSvgDashboardChart(recentSales) {
     svgContent += `</svg>`;
     
     container.innerHTML = svgContent;
+}
+
+async function forceSyncNow() {
+    if (!pyApi || !pyApi.force_sync_now) return;
+    try {
+        const res = await pyApi.force_sync_now();
+        showToast(res.success ? (res.message || "Sincronizado") : (res.error || "Error"), res.success ? "success" : "danger");
+        if (res.success) {
+            await loadAllData();
+            updateSyncStatusUI();
+        }
+    } catch (e) {
+        showToast("Error al sincronizar.", "danger");
+    }
+}
+
+async function updateSyncStatusUI() {
+    const bar = document.getElementById("sync-status-bar");
+    const dot = document.getElementById("sync-status-dot");
+    const text = document.getElementById("sync-status-text");
+    if (!bar || !pyApi || !pyApi.get_sync_status) return;
+
+    try {
+        const res = await pyApi.get_sync_status();
+        if (!res.success || !res.data?.enabled) {
+            bar.style.display = "none";
+            return;
+        }
+        bar.style.display = "flex";
+        const d = res.data;
+        dot.className = "sync-dot";
+        if (d.syncing) {
+            dot.classList.add("syncing");
+            text.textContent = "Sincronizando...";
+        } else if (d.online) {
+            dot.classList.add("online");
+            text.textContent = d.pending > 0 ? `En línea · ${d.pending} pendiente(s)` : "En línea · sincronizado";
+        } else {
+            dot.classList.add("offline");
+            text.textContent = d.pending > 0 ? `Sin conexión · ${d.pending} pendiente(s)` : "Sin conexión · modo offline";
+        }
+    } catch (e) {
+        bar.style.display = "none";
+    }
 }
 
 // ----------------- SINCRONIZACIÓN EN LA NUBE -----------------

@@ -3,6 +3,7 @@ from kivy.lang import Builder
 from kivy.properties import ListProperty, NumericProperty, StringProperty
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.metrics import dp
+from kivy.clock import Clock
 import data_access as database
 import config
 
@@ -764,11 +765,29 @@ class StockVibeApp(App):
                 self.settings_message = f'Sin conexión al servidor: {e}'
             else:
                 raise
+        if config.is_sync():
+            Clock.schedule_interval(self._background_sync, 45)
         self.exchange_rate = database.get_exchange_rate()
         self.load_categories()
         self.load_products()
         self.load_debtors()
         self.update_dashboard()
+
+    def _background_sync(self, _dt):
+        if not config.is_sync():
+            return
+        try:
+            import sync_engine
+            sync_engine.sync_all(force_pull=True)
+            screen = self.root.current
+            if screen == 'inventory':
+                self.load_products()
+            elif screen == 'dashboard':
+                self.update_dashboard()
+            elif screen == 'debtors':
+                self.load_debtors()
+        except Exception:
+            pass
 
     def change_screen(self, screen_name):
         self.root.current = screen_name
