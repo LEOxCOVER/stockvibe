@@ -50,11 +50,6 @@ jobs:
           if [ -z "$API_KEY" ]; then API_KEY="TU_CLAVE_SECRETA"; fi
           printf '{\n  "mode": "sync",\n  "api_url": "%s",\n  "api_key": "%s"\n}\n' "$API_URL" "$API_KEY" > stockvibe_config.json
 
-      - name: Setup build tools
-        run: |
-          autoreconf --install --force || true
-          libtoolize --force --install || true
-
       - name: Build debug APK
         env:
           BUILDOZER_WARN_ON_ROOT: '0'
