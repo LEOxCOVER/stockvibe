@@ -31,10 +31,20 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
+<<<<<<< HEAD
             git zip unzip openjdk-17-jdk \
             autoconf automake libtool pkg-config \
             zlib1g-dev libncurses5-dev libncursesw5-dev \
             cmake libffi-dev libssl-dev
+=======
+          git zip unzip openjdk-17-jdk \
+          build-essential m4 pkg-config \
+          zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo6 \
+          cmake libffi-dev libssl-dev \
+          autoconf automake libtool libtool-bin libltdl-dev \
+          autoconf-archive autotools-dev
+          libtoolize --force --install || true
+>>>>>>> b1e4970ae5e279072c05ab08726b1866c78d71cc
 
       - name: Install Buildozer
         run: |
