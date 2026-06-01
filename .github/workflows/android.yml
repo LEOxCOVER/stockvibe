@@ -34,7 +34,8 @@ jobs:
             git zip unzip openjdk-17-jdk \
             build-essential autoconf automake libtool libtool-bin m4 pkg-config \
             zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo6 \
-            cmake libffi-dev libssl-dev
+            cmake libffi-dev libssl-dev \
+            libtool-bin autotools-dev autoconf-archive
 
       - name: Install Buildozer
         run: |
@@ -48,6 +49,11 @@ jobs:
           if [ -z "$API_URL" ]; then API_URL="https://stockvibe-api.onrender.com"; fi
           if [ -z "$API_KEY" ]; then API_KEY="TU_CLAVE_SECRETA"; fi
           printf '{\n  "mode": "sync",\n  "api_url": "%s",\n  "api_key": "%s"\n}\n' "$API_URL" "$API_KEY" > stockvibe_config.json
+
+      - name: Setup build tools
+        run: |
+          autoreconf --install --force || true
+          libtoolize --force --install || true
 
       - name: Build debug APK
         env:
