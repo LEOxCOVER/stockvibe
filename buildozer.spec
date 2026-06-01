@@ -6,7 +6,7 @@ package.domain = org.stockvibe
 source.dir = .
 source.main = main_android.py
 source.include_exts = py,kv,json,txt
-source.include_patterns = stockvibe_config.example.json
+source.include_patterns = stockvibe_config.example.json,stockvibe_config.json
 source.exclude_dirs = .venv,.git,build,dist,bin,.buildozer,backend,web,.vscode
 
 version = 1.1.0
