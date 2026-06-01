@@ -8,7 +8,23 @@ import sys
 CONFIG_FILENAME = "stockvibe_config.json"
 
 
+def _android_data_dir():
+    try:
+        from kivy.utils import platform as kivy_platform
+        if kivy_platform == "android":
+            from android.storage import app_storage_path
+            path = app_storage_path()
+            os.makedirs(path, exist_ok=True)
+            return path
+    except Exception:
+        pass
+    return None
+
+
 def _config_dir():
+    android_dir = _android_data_dir()
+    if android_dir:
+        return android_dir
     if getattr(sys, "frozen", False):
         return os.path.dirname(sys.executable)
     return os.path.dirname(os.path.abspath(__file__))

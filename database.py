@@ -12,6 +12,26 @@ OperationalError = db_backend.OperationalError
 DATABASE_NAME = db_backend.SQLITE_PATH
 
 
+def _data_dir():
+    try:
+        from kivy.utils import platform as kivy_platform
+        if kivy_platform == "android":
+            from android.storage import app_storage_path
+            path = app_storage_path()
+            os.makedirs(path, exist_ok=True)
+            return path
+    except Exception:
+        pass
+    if getattr(sys, "frozen", False):
+        return os.path.dirname(sys.executable)
+    return os.path.dirname(os.path.abspath(__file__))
+
+
+if not db_backend.IS_POSTGRES:
+    db_backend.SQLITE_PATH = os.path.join(_data_dir(), "inventory.db")
+    DATABASE_NAME = db_backend.SQLITE_PATH
+
+
 def get_db_connection():
     return db_backend.get_db_connection()
 

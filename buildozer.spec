@@ -1,42 +1,29 @@
 [app]
-# (str) Title of your application
 title = StockVibe Mobile
-
-# (str) Package name
 package.name = stockvibe
-
-# (str) Package domain (needed for Android packaging)
 package.domain = org.stockvibe
 
-# (str) Source code where the main.py is located
 source.dir = .
+source.main = main_android.py
+source.include_exts = py,kv,json,txt
+source.include_patterns = stockvibe_config.example.json
+source.exclude_dirs = .venv,.git,build,dist,bin,.buildozer,backend,web,.vscode
 
-# (list) Source file extensions to include
-source.include_exts = py,kv,db,txt
+version = 1.1.0
 
-# (str) Application versioning
-version = 1.0
+requirements = python3,kivy,pyjnius,android
 
-# (list) Application requirements
-requirements = python3,kivy
-
-# (str) Supported orientations
 orientation = portrait
 
-# (list) Android architectures to build for
-android.arch = armeabi-v7a, arm64-v8a
-
-# (str) Presplash picture
-presplash.filename = 
-
-# (str) Icon of the application
-icon.filename = 
-
-# (list) Permissions
-android.permissions = INTERNET
-
-# (str) Android API level
+android.archs = arm64-v8a,armeabi-v7a
+android.permissions = INTERNET,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE
 android.api = 33
+android.minapi = 24
+android.accept_sdk_license = True
+android.allow_backup = True
 
-# (str) Buildozer log level
 log_level = 2
+
+[buildozer]
+log_level = 2
+warn_on_root = 0

@@ -1,0 +1,62 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'main_android.py'
+      - 'buildozer.spec'
+      - 'database.py'
+      - 'sync_*.py'
+      - 'api_client.py'
+      - 'config.py'
+      - 'data_access.py'
+      - 'db_backend.py'
+      - '.github/workflows/android.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            git zip unzip openjdk-17-jdk \
+            autoconf automake libtool pkg-config \
+            zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 \
+            cmake libffi-dev libssl-dev
+
+      - name: Install Buildozer
+        run: |
+          python -m pip install --upgrade pip
+          pip install buildozer cython==0.29.36
+
+      - name: Prepare sync config for APK
+        run: |
+          API_URL="${{ secrets.STOCKVIBE_API_URL }}"
+          API_KEY="${{ secrets.STOCKVIBE_API_KEY }}"
+          if [ -z "$API_URL" ]; then API_URL="https://stockvibe-api.onrender.com"; fi
+          if [ -z "$API_KEY" ]; then API_KEY="TU_CLAVE_SECRETA"; fi
+          printf '{\n  "mode": "sync",\n  "api_url": "%s",\n  "api_key": "%s"\n}\n' "$API_URL" "$API_KEY" > stockvibe_config.json
+
+      - name: Build debug APK
+        env:
+          BUILDOZER_WARN_ON_ROOT: '0'
+        run: buildozer -v android debug
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: stockvibe-android-debug
+          path: bin/*.apk
+          if-no-files-found: error
