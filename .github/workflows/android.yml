@@ -28,16 +28,16 @@ jobs:
           python-version: '3.11'
 
       - name: Install system dependencies
-       run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-        git zip unzip openjdk-17-jdk \
-        build-essential m4 pkg-config \
-        zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo6 \
-        cmake libffi-dev libssl-dev \
-        autoconf automake libtool libtool-bin libltdl-dev \
-        autoconf-archive autotools-dev
-        libtoolize --force --install || true
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+          git zip unzip openjdk-17-jdk \
+          build-essential m4 pkg-config \
+          zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo6 \
+          cmake libffi-dev libssl-dev \
+          autoconf automake libtool libtool-bin libltdl-dev \
+          autoconf-archive autotools-dev
+          libtoolize --force --install || true
 
       - name: Install Buildozer
         run: |
